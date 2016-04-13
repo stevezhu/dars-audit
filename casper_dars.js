@@ -17,6 +17,7 @@ const casper = require('casper').create({
 const LOGIN_URL = 'https://darsweb.admin.uillinois.edu:443/darswebstu_uiuc/servlet/EASDarsServlet';
 const REQUEST_AUDIT_URL = 'https://darsweb.admin.uillinois.edu/darswebstu_uiuc/servlet/RequestAuditServlet';
 const VIEW_AUDITS_URL = 'https://darsweb.admin.uillinois.edu/darswebstu_uiuc/servlet/ListAuditsServlet';
+const AUDIT_URL = 'https://darsweb.admin.uillinois.edu/darswebstu_uiuc/ParseAudit.jsp';
 
 var settings = {
   credentials: {
@@ -39,22 +40,39 @@ casper.thenOpen(REQUEST_AUDIT_URL);
 casper.thenOpen(VIEW_AUDITS_URL);
 
 casper.then(function() {
-  this.capture('captures/capture.png');
-
-  this.click('input[name=DETAILS]');
+  this.capture('captures/view_audits.png');
 });
 
-casper.thenOpen('https://darsweb.admin.uillinois.edu/darswebstu_uiuc/ParseAudit.jsp?' + querystring.stringify({
-  job_id: 2016041223254581,
-  int_seq_no: 6568370,
-  instidq: 73,
-  instid: 001775,
-  instcd: 'HYP',
-  DETAILS: 'Open+Audit'
-}));
-
+var audits;
 casper.then(function() {
-  this.capture('captures/audit.png');
+  audits = this.evaluate(function() {
+    var audits = [];
+    var $inputs = $('input[name=DETAILS]');
+    $inputs.each(function() {
+      var $input = $(this);
+      var match = $input.attr('onclick').match(/OnViewAudit\('(\d+?)', '(\d+?)'\)/);
+      var audit = {
+        job_id: match[1],
+        int_seq_no: match[2]
+      };
+      audits.push(audit);
+    });
+    return audits;
+  });
+}).then(function() {
+  this.each(audits, function(self, audit) {
+    self.thenOpen(AUDIT_URL + '?' + querystring.stringify({
+      job_id: audit.job_id,
+      int_seq_no: audit.int_seq_no,
+      instidq: 73,
+      instid: 001775,
+      instcd: 'HYP',
+      DETAILS: 'Open+Audit'
+    }));
+    self.then(function() {
+      this.capture('captures/audit' + audit.job_id + '.png');
+    });
+  });
 });
 
 casper.on('remote.message', function(msg) {
