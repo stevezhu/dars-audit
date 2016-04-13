@@ -1,5 +1,6 @@
 console.log('start');
 
+const _ = require('lodash');
 const querystring = require('querystring');
 
 const sjcl = require('sjcl');
@@ -44,6 +45,7 @@ casper.then(function() {
 });
 
 var audits;
+var auditInfo = {};
 casper.then(function() {
   audits = this.evaluate(function() {
     var audits = [];
@@ -59,16 +61,18 @@ casper.then(function() {
     });
     return audits;
   });
+  auditInfo = this.evaluate(function() {
+    return {
+      instidq: $('input[name=instidq]').val(),
+      instid: $('input[name=instid]').val(),
+      instcd: $('input[name=instcd]').val()
+    };
+  });
+  auditInfo.DETAILS = 'Open+Audit';
 }).then(function() {
   this.each(audits, function(self, audit) {
-    self.thenOpen(AUDIT_URL + '?' + querystring.stringify({
-      job_id: audit.job_id,
-      int_seq_no: audit.int_seq_no,
-      instidq: 73,
-      instid: 001775,
-      instcd: 'HYP',
-      DETAILS: 'Open+Audit'
-    }));
+    audit = _.defaults(audit, auditInfo);
+    self.thenOpen(AUDIT_URL + '?' + querystring.stringify(audit));
     self.then(function() {
       this.capture('captures/audit' + audit.job_id + '.png');
     });
