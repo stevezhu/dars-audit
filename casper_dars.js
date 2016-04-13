@@ -40,6 +40,21 @@ casper.thenOpen(VIEW_AUDITS_URL);
 
 casper.then(function() {
   this.capture('captures/capture.png');
+
+  this.click('input[name=DETAILS]');
+});
+
+casper.thenOpen('https://darsweb.admin.uillinois.edu/darswebstu_uiuc/ParseAudit.jsp?' + querystring.stringify({
+  job_id: 2016041223254581,
+  int_seq_no: 6568370,
+  instidq: 73,
+  instid: 001775,
+  instcd: 'HYP',
+  DETAILS: 'Open+Audit'
+}));
+
+casper.then(function() {
+  this.capture('captures/audit.png');
 });
 
 casper.on('remote.message', function(msg) {
