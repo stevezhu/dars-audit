@@ -1,5 +1,3 @@
-console.log('start');
-
 const _ = require('lodash');
 const querystring = require('querystring');
 
