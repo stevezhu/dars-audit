@@ -13,6 +13,8 @@ const casper = require('casper').create({
   },
 });
 
+const ETX_CHAR = String.fromCharCode(3);
+
 const LOGIN_URL = 'https://darsweb.admin.uillinois.edu:443/darswebstu_uiuc/servlet/EASDarsServlet';
 const REQUEST_AUDIT_URL = 'https://darsweb.admin.uillinois.edu/darswebstu_uiuc/servlet/RequestAuditServlet';
 const VIEW_AUDITS_URL = 'https://darsweb.admin.uillinois.edu/darswebstu_uiuc/servlet/ListAuditsServlet';
@@ -73,12 +75,14 @@ casper.then(function() {
     self.thenOpen(AUDIT_URL + '?' + querystring.stringify(audit));
     self.then(function() {
       this.capture('captures/audit' + audit.job_id + '.png');
+      this.echo(this.getHTML());
+      this.echo(ETX_CHAR);
     });
   });
 });
 
-casper.on('remote.message', function(msg) {
-  this.echo('remote message caught: ' + msg);
-});
+// casper.on('remote.message', function(msg) {
+//   this.echo('remote message caught: ' + msg);
+// });
 
 casper.run();

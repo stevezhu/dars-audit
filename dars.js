@@ -1,5 +1,9 @@
 const cp = require('child_process');
+const readline = require('readline');
 const argv = require('yargs').argv;
+const cheerio = require('cheerio');
+
+const ETX_CHAR = String.fromCharCode(3);
 
 const casper_process = cp.spawn('casperjs', [
   'casper_dars.js',
@@ -7,14 +11,26 @@ const casper_process = cp.spawn('casperjs', [
   '--password=' + argv.password
 ]);
 
-casper_process.stdout.on('data', (data) => {
-  console.log(`stdout: ${data}`);
+var html = "";
+
+readline.createInterface({
+  input: casper_process.stdout,
+  terminal: false
+}).on('line', function(line) {
+  if (line === ETX_CHAR) {
+    var $ = cheerio.load(html);
+    console.log($.html());
+
+    html = ""; // reset html
+  } else {
+    html += line + '\n';
+  }
 });
 
-casper_process.stderr.on('data', (data) => {
+casper_process.stderr.on('data', function(data) {
   console.log(`stderr: ${data}`);
 });
 
-casper_process.on('close', (code) => {
+casper_process.on('close', function(code) {
   console.log(`child process exited with code ${code}`);
 });
