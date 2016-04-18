@@ -14,11 +14,12 @@ const casper = require('casper').create({
 });
 
 const ETX_CHAR = String.fromCharCode(3);
-
-const LOGIN_URL = 'https://darsweb.admin.uillinois.edu:443/darswebstu_uiuc/servlet/EASDarsServlet';
-const REQUEST_AUDIT_URL = 'https://darsweb.admin.uillinois.edu/darswebstu_uiuc/servlet/RequestAuditServlet';
-const VIEW_AUDITS_URL = 'https://darsweb.admin.uillinois.edu/darswebstu_uiuc/servlet/ListAuditsServlet';
-const AUDIT_URL = 'https://darsweb.admin.uillinois.edu/darswebstu_uiuc/ParseAudit.jsp';
+const URLS = {
+  LOGIN: 'https://darsweb.admin.uillinois.edu:443/darswebstu_uiuc/servlet/EASDarsServlet',
+  REQUEST_AUDIT: 'https://darsweb.admin.uillinois.edu/darswebstu_uiuc/servlet/RequestAuditServlet',
+  VIEW_AUDITS: 'https://darsweb.admin.uillinois.edu/darswebstu_uiuc/servlet/ListAuditsServlet',
+  AUDIT: 'https://darsweb.admin.uillinois.edu/darswebstu_uiuc/ParseAudit.jsp'
+};
 
 var settings = {
   credentials: {
@@ -27,7 +28,7 @@ var settings = {
   }
 };
 
-casper.start(LOGIN_URL, function() {
+casper.start(URLS.LOGIN, function() {
   this.fill('form[name="easForm"]', {
     inputEnterpriseId: settings.credentials.username,
     password: settings.credentials.password
@@ -36,9 +37,9 @@ casper.start(LOGIN_URL, function() {
   this.capture('captures/signin.png');
 });
 
-casper.thenOpen(REQUEST_AUDIT_URL);
+casper.thenOpen(URLS.REQUEST_AUDIT);
 
-casper.thenOpen(VIEW_AUDITS_URL);
+casper.thenOpen(URLS.VIEW_AUDITS);
 
 casper.then(function() {
   this.capture('captures/view_audits.png');
@@ -72,7 +73,7 @@ casper.then(function() {
 }).then(function() {
   this.each(audits, function(self, audit) {
     audit = _.defaults(audit, auditInfo);
-    self.thenOpen(AUDIT_URL + '?' + querystring.stringify(audit));
+    self.thenOpen(URLS.AUDIT + '?' + querystring.stringify(audit));
     self.then(function() {
       this.capture('captures/audit' + audit.job_id + '.png');
       this.echo(this.getHTML());
