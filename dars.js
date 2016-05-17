@@ -36,7 +36,7 @@ readline.createInterface({
     match = PATTERNS.HEADER_DATA.exec(headerText);
 
     var headerData = {
-      date: new Date(match[1] + ' ' + match[2]),
+      creationDate: new Date(match[1] + ' ' + match[2]),
       uin: parseInt(match[3]),
       programCode: match[4] + ' ' + match[5],
       catalogYear: match[6],
@@ -49,6 +49,10 @@ readline.createInterface({
       headerData.programName.push(match[1]);
     }
     console.log(headerData);
+
+    // while (match = PATTERNS.UNDERLINE.exec(html)) {
+    //   console.log("match", match[1].trim());
+    // }
 
     html = ""; // reset html
 
